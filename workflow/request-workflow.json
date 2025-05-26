@@ -1,0 +1,127 @@
+{
+  "name": "Guest Request Logging",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "guest-request",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -140
+      ],
+      "id": "e33a7f6a-4a35-48b4-9a69-b3246865f550",
+      "name": "Webhook",
+      "webhookId": "eedc3b2c-0312-4b29-809d-c7ccce2962ce"
+    },
+    {
+      "parameters": {
+        "jsCode": "const msg = $json.body.entry[0].changes[0].value.messages[0];\n\nreturn [{\n  json: {\n    phone: msg.from,\n    text: msg.text.body,\n    message: \"✅ Request received. We'll get back to you shortly!\"\n  }\n}];\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        -140
+      ],
+      "id": "9bb51944-67e8-47ef-9b84-83b4a9e786c3",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/requests",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=phone",
+              "value": "={{$json.phone}}"
+            },
+            {
+              "name": "=text",
+              "value": "={{$json.text}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        -140
+      ],
+      "id": "b4828618-65b8-42f8-b72f-68cbe86b75d6",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [
+        660,
+        -140
+      ],
+      "id": "8b870f4f-57b8-4c49-8998-c101e0af7122",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e7881b7a-717d-484b-a783-4d2f434891a2",
+  "meta": {
+    "instanceId": "148accbdd0944509ca08dea8f11a6d80cd42f37bc09d9e786d3ef53756ea6eef"
+  },
+  "id": "4XiPEhjNnBqFoL5W",
+  "tags": []
+}
